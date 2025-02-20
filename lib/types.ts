@@ -15,8 +15,9 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'student' | 'teacher';
+  role: "student" | "teacher";
 }
+
 
 export const TEACHER_EMAIL = 'rishabh.dubey@example.com';
 export const DUMMY_STUDENTS = [
