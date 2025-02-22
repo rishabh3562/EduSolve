@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sparkles, RefreshCw } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 
 interface DoubtCardProps {
@@ -41,7 +41,9 @@ export function DoubtCard({ doubt, onViewDetails }: DoubtCardProps) {
           <Badge variant="secondary">{doubt.subject}</Badge>
         </div>
         <CardDescription>
-          Posted {formatDistanceToNow(new Date(doubt.createdAt))} ago
+          Posted {doubt.createdAt
+            ? `Posted ${formatDistanceToNow(parseISO(doubt.createdAt))} ago`
+            : 'Unknown Date'} ago
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

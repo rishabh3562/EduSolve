@@ -10,7 +10,12 @@ export interface Doubt {
   teacherAnswer?: string;
   teacherId?: string;
 }
-
+export interface askFormDataType {
+  title?: string;
+  description: string;
+  subject: string;
+  studentId?: string;
+}
 export interface User {
   id: string;
   name: string;

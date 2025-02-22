@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow,parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { Doubt } from '@/lib/types';
 
@@ -77,7 +77,9 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
               <div>
                 <CardTitle className="text-2xl">{doubt.title}</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Posted {formatDistanceToNow(new Date(doubt.createdAt))} ago
+                  Posted {doubt.createdAt
+                    ? `Posted ${formatDistanceToNow(parseISO(doubt.createdAt))} ago`
+                    : 'Unknown Date'} ago
                 </p>
               </div>
               <Badge variant="secondary">{doubt.subject}</Badge>

@@ -11,6 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/lib/auth';
 import { toast } from 'sonner';
+import { postDoubt } from '@/lib/supabase';
+import { askFormDataType } from '@/lib/types';
 
 const subjects = [
   'Mathematics',
@@ -27,36 +29,40 @@ export default function AskDoubt() {
   const router = useRouter();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
+
+  // Explicitly define the type for form data
+  const [formData, setFormData] = useState<askFormDataType>({
     title: '',
     description: '',
     subject: '',
+    studentId: user?.id || '',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) {
       toast.error('Please log in to submit a doubt');
       return;
     }
 
+    if (!formData.subject) {
+      toast.error('Please select a subject');
+      return;
+    }
+console.log("user.id",user.id)
     setIsSubmitting(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a real app, this would be an API call to create a new doubt
-      const newDoubt = {
-        id: Date.now().toString(),
-        ...formData,
-        studentId: user.id,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-      };
+      await postDoubt({
+        title: formData.title!,
+        description: formData.description,
+        subject: formData.subject,
+        studentId: user.id, // No need to assert non-null
+      });
 
       toast.success('Doubt submitted successfully');
       router.push('/dashboard');
     } catch (error) {
+      console.error('Error submitting doubt:', error);
       toast.error('Failed to submit doubt');
     } finally {
       setIsSubmitting(false);
@@ -79,7 +85,7 @@ export default function AskDoubt() {
                   id="title"
                   placeholder="e.g., How to solve quadratic equations?"
                   value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
                   required
                 />
               </div>
@@ -87,8 +93,8 @@ export default function AskDoubt() {
               <div className="space-y-2">
                 <Label htmlFor="subject">Subject</Label>
                 <Select
-                  value={formData.subject}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, subject: value }))}
+                  value={formData.subject || ''} // Ensure it's never undefined
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, subject: value }))}
                   required
                 >
                   <SelectTrigger>
@@ -111,7 +117,7 @@ export default function AskDoubt() {
                   placeholder="Describe your doubt in detail..."
                   className="min-h-[150px]"
                   value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                   required
                 />
               </div>
