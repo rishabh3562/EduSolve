@@ -17,7 +17,7 @@ export interface askFormDataType {
   studentId?: string;
 }
 export interface User {
-  id: string;
+  id: string | null;
   name: string;
   email: string;
   role: "student" | "teacher";

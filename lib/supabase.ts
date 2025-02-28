@@ -21,14 +21,33 @@ export async function fetchDoubts(): Promise<Doubt[]> {
   return data || [];
 }
 
-export async function fetchDoubtById(id: string): Promise<Doubt | null> {
+export async function fetchDoubtById(
+  id: string
+): Promise<Doubt | null | undefined | any> {
   const { data, error } = await supabase
     .from("doubts")
     .select("*")
-    .eq("id", id)
-    .single();
-  if (error) throw error;
-  return data || null;
+    .eq("studentid", id)
+    .maybeSingle(); // safer than .single()
+
+  if (error) {
+    console.error("Error fetching doubt:", error);
+    return null;
+  }
+  return data;
+}
+
+export async function fetchDoubtsByUserId(userId: string): Promise<Doubt[]> {
+  const { data, error } = await supabase
+    .from("doubts")
+    .select("*")
+    .eq("studentid", userId);
+
+  if (error) {
+    console.error("Error fetching doubts:", error);
+    return [];
+  }
+  return data || [];
 }
 
 export async function postDoubt(formData: askFormDataType) {
@@ -36,9 +55,7 @@ export async function postDoubt(formData: askFormDataType) {
   console.log("formData", formData);
   const { data, error } = await supabase
     .from("doubts")
-    .insert([
-      { title, description, subject, studentid: studentId, status: "pending" },
-    ]);
+    .insert([{ title, description, subject, studentId, status: "pending" }]);
   console.log("data", data);
   console.log("error", error);
   if (error) throw new Error(error.message);
