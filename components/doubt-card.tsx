@@ -8,11 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Sparkles, RefreshCw } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { toast } from 'sonner';
-
-interface DoubtCardProps {
-  doubt: Doubt;
-  onViewDetails?: (id: string) => void;
-}
+import { DoubtCardProps } from '@/lib/types';
 
 export function DoubtCard({ doubt, onViewDetails }: DoubtCardProps) {
   const [isGenerating, setIsGenerating] = useState(false);

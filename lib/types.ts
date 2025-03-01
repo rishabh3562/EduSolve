@@ -23,6 +23,10 @@ export interface User {
   email: string;
   role: "student" | "teacher";
 }
+export interface DoubtCardProps {
+  doubt: Doubt;
+  onViewDetails?: (id: string) => void;
+}
 
 // You can remove these if you're no longer using dummy data:
 // export const TEACHER_EMAIL = 'rishabh.dubey@example.com';
