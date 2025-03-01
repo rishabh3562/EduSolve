@@ -21,7 +21,17 @@ export async function fetchDoubts(): Promise<Doubt[]> {
   if (error) throw error;
   return data || [];
 }
+export async function getCurrentUser() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) return null;
 
+  const { data: userData } = await supabase
+    .from("users")
+    .select("id, role")
+    .eq("id", data.user.id)
+    .single();
+  return userData;
+}
 // Fetch doubt by ID
 export const getDoubtById = async (id: string): Promise<Doubt | null> => {
   const { data, error } = await supabase.from('doubts').select('*').eq('id', id).single();

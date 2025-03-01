@@ -10,6 +10,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { DoubtCardProps } from '@/lib/types';
 import { fetchStudentById } from '@/lib/supabase';
+import {generateGeminiAnswer} from '@/lib/aiService'
 export function DoubtCard({ doubt, onViewDetails }: DoubtCardProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiAnswer, setAiAnswer] = useState(doubt.aiAnswer);
@@ -17,9 +18,7 @@ export function DoubtCard({ doubt, onViewDetails }: DoubtCardProps) {
   const generateAnswer = async () => {
     setIsGenerating(true);
     try {
-      // Simulate API call to Gemini
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const newAnswer = 'This is a simulated AI-generated answer using Gemini...';
+      const newAnswer = await generateGeminiAnswer(doubt.description);
       setAiAnswer(newAnswer);
       toast.success('Answer generated successfully');
     } catch (error) {
@@ -28,6 +27,7 @@ export function DoubtCard({ doubt, onViewDetails }: DoubtCardProps) {
       setIsGenerating(false);
     }
   };
+
   useEffect(() => {
     const fetchData = async () => {
      
