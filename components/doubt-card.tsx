@@ -45,14 +45,13 @@ export function DoubtCard({ doubt, onViewDetails }: DoubtCardProps) {
           <CardTitle className="text-xl">{doubt.title}</CardTitle>
           <Badge variant="secondary">{doubt.subject}</Badge>
         </div>
-        <CardDescription>
-          Posted {doubt.createdAt
-            ? `Posted ${formatDistanceToNow(parseISO(doubt.updatedAt as string))} ago`
-            : 'Unknown Date'} ago
-        </CardDescription>
-        <CardDescription>
-          {userData ? `Posted by ${userData[0]?.name || 'Unknown'}` : 'Loading...'}
-        </CardDescription>
+        <div className="text-sm text-muted-foreground">
+          {doubt.updatedAt
+            ? `${formatDistanceToNow(new Date(doubt.updatedAt))} ago`
+            : ' '}
+          {' • '}
+          {userData ? `By ${userData[0]?.name || 'Unknown'}` : 'Loading...'}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">

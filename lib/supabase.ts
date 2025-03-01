@@ -54,10 +54,9 @@ export async function fetchDoubtsByUserId(userId: string): Promise<Doubt[]> {
 //fetchuserbyid
 export async function fetchStudentById(studentId: string) {
   const { data, error } = await supabase
-    .from("doubts")
+    .from("users")
     .select("*")
-    .eq("studentId", studentId)
-    .single();
+    .eq("id", studentId)
   if (error) {
     throw error;
   } else {
