@@ -7,40 +7,38 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
+import { Sparkles, RefreshCw, CheckCircle, XCircle, User } from 'lucide-react';
 import { formatDistanceToNow,parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { Doubt } from '@/lib/types';
-
+import { getDoubtById ,approveDoubt,updateDoubtWithAIAnswer} from '@/lib/supabase';
+import { useAuth } from '@/lib/auth';
 export default function DoubtReview({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [doubt, setDoubt] = useState<Doubt | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [teacherAnswer, setTeacherAnswer] = useState('');
-
+const {user:Teacher} =useAuth();
   useEffect(() => {
-    // Simulate fetching doubt details
-    const dummyDoubt: Doubt = {
-      id: params.id,
-      title: 'Understanding Quantum Mechanics',
-      description: 'I\'m having trouble understanding the concept of quantum superposition...',
-      subject: 'Physics',
-      studentId: 'student1',
-      status: 'pending',
-      createdAt: new Date().toISOString(),
+    const fetchDoubt = async () => {
+      const doubtData = await getDoubtById(params.id);
+      if (doubtData) setDoubt(doubtData);
     };
-    setDoubt(dummyDoubt);
+    fetchDoubt();
   }, [params.id]);
 
+
   const generateAnswer = async () => {
+    if (!doubt) return; // Ensure doubt is available
     setIsGenerating(true);
     try {
-      // Simulate Gemini API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
       const aiAnswer = 'This is a simulated AI-generated answer using Gemini...';
-      setDoubt(prev => prev ? { ...prev, aiAnswer } : null);
-      setTeacherAnswer(aiAnswer); // Pre-fill teacher's answer with AI response
+
+      await updateDoubtWithAIAnswer(doubt.id, aiAnswer); // Only called if doubt exists
+
+      setDoubt((prev) => (prev ? { ...prev, aiAnswer } : prev));
+      setTeacherAnswer(aiAnswer);
       toast.success('Answer generated successfully');
     } catch (error) {
       toast.error('Failed to generate answer');
@@ -50,10 +48,10 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
   };
 
   const handleApprove = async () => {
+    if (!doubt) return; // Ensure doubt is available before proceeding
     setIsSubmitting(true);
     try {
-      // Simulate API call to approve doubt
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await approveDoubt(doubt.id, teacherAnswer,Teacher?.id as string ); // Only called if doubt exists
       toast.success('Doubt approved and sent to student');
       router.push('/teacher');
     } catch (error) {
@@ -62,6 +60,7 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
       setIsSubmitting(false);
     }
   };
+
 
   if (!doubt) {
     return <div>Loading...</div>;
@@ -78,7 +77,7 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
                 <CardTitle className="text-2xl">{doubt.title}</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
                   Posted {doubt.createdAt
-                    ? `Posted ${formatDistanceToNow(parseISO(doubt.createdAt))} ago`
+                    ? `Posted ${formatDistanceToNow(new Date(doubt.createdAt))} ago ago`
                     : 'Unknown Date'} ago
                 </p>
               </div>

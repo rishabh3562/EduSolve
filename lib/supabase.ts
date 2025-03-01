@@ -22,22 +22,37 @@ export async function fetchDoubts(): Promise<Doubt[]> {
   return data || [];
 }
 
-export async function fetchDoubtById(
-  id: string
-): Promise<Doubt | null | undefined | any> {
-  const { data, error } = await supabase
-    .from("doubts")
-    .select("*")
-    .eq("studentId", id)
-    .maybeSingle(); // safer than .single()
-
+// Fetch doubt by ID
+export const getDoubtById = async (id: string): Promise<Doubt | null> => {
+  const { data, error } = await supabase.from('doubts').select('*').eq('id', id).single();
   if (error) {
-    console.error("Error fetching doubt:", error);
+    console.error('Error fetching doubt:', error);
     return null;
   }
   return data;
-}
-
+};
+// Update doubt with AI-generated answer
+export const updateDoubtWithAIAnswer = async (id: string |null, aiAnswer: string) => {
+  const { error } = await supabase.from('doubts').update({ aiAnswer }).eq('id', id);
+  if (error) {
+    console.error('Error updating AI answer:', error);
+    throw error;
+  }
+};
+// Approve doubt and update teacher's answer
+export const approveDoubt = async (id: string, teacherAnswer: string, teacherId: string) => {
+  const { error } = await supabase.from('doubts').update({
+    teacherAnswer,
+    teacherId,
+    status: 'completed',
+    updatedAt: new Date().toISOString(),
+  }).eq('id', id);
+  
+  if (error) {
+    console.error('Error approving doubt:', error);
+    throw error;
+  }
+};
 export async function fetchDoubtsByUserId(userId: string): Promise<Doubt[]> {
   const { data, error } = await supabase
     .from("doubts")
