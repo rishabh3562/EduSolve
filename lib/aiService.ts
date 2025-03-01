@@ -21,17 +21,17 @@ export async function generateGeminiAnswer(question: string): Promise<string> {
       Student: ${question}
     `;
 
-    console.log("Sending request to Gemini API...");
-    console.log("Prompt:", prompt);
+    // console.log("Sending request to Gemini API...");
+    // console.log("Prompt:", prompt);
 
     const result = await model.generateContent(prompt); // Directly send the prompt
 
     const text = result?.response?.text() || "No response generated.";
 
-    console.log("AI Teacher Response:", text);
+    // console.log("AI Teacher Response:", text);
     return text;
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    // console.error("Gemini API Error:", error);
     throw new Error("Failed to generate answer.");
   }
 }

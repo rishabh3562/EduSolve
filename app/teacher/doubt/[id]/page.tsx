@@ -36,7 +36,7 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
     setIsGenerating(true);
     try {
       const aiAnswer = await generateGeminiAnswer(doubt.description);
-      console.log("aianswer in ask",aiAnswer)
+      // console.log("aianswer in ask",aiAnswer)
       await updateDoubtWithAIAnswer(doubt.id, aiAnswer);
       setDoubt((prev) => (prev ? { ...prev, aiAnswer } : prev));
       setTeacherAnswer(aiAnswer);

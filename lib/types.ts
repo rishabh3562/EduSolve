@@ -5,7 +5,7 @@ export interface Doubt {
   subject: string;
   studentId: string;
   status: "pending" | "reviewing" | "completed";
-  createdAt: string | null | undefined;
+  createdAt?: string | null | undefined;
   updatedAt?: string | null | undefined;
   aiAnswer?: string;
   teacherAnswer?: string;

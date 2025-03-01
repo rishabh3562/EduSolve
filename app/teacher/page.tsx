@@ -21,9 +21,10 @@ const {user}=useAuth()
       try {
         const teacherId = user?.id; // Replace with actual teacher's ID (e.g., from auth)
         const pending = await fetchDoubtsByStatus("pending", teacherId);
-        console.log("pending",pending)
+        // console.log("pending",pending)
         const reviewing = await fetchDoubtsByStatus("reviewing", teacherId);
         const completed = await fetchDoubtsByStatus("completed", teacherId);
+        // console.log("completed", completed)
         setPendingDoubts(pending);
         setReviewingDoubts(reviewing);
         setCompletedDoubts(completed);
@@ -37,7 +38,7 @@ const {user}=useAuth()
   const handleViewDetails = (id: string) => {
     router.push(`/teacher/doubt/${id}`);
   };
-
+// console.log("completedDoubts",completedDoubts)
   return (
     <div className="min-h-screen bg-background">
       <NavBar />
