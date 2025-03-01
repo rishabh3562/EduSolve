@@ -49,16 +49,32 @@ export const useAuth = create<AuthState>((set) => ({
 
   // Start OAuth flow for Google.
   login: async () => {
+    const redirectUrl =
+      process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        redirectTo: `${redirectUrl}/`,
       },
     });
+
     if (error) {
       console.error("Login failed:", error);
     }
   },
+
+  // login: async () => {
+  //   const { error } = await supabase.auth.signInWithOAuth({
+  //     provider: "google",
+  //     options: {
+  //       redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+  //     },
+  //   });
+  //   if (error) {
+  //     console.error("Login failed:", error);
+  //   }
+  // },
 
   logout: async () => {
     await supabase.auth.signOut();
