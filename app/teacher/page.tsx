@@ -6,7 +6,8 @@ import { NavBar } from '@/components/nav-bar';
 import { DoubtCard } from '@/components/doubt-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Doubt } from '@/lib/types';
-
+import { fetchDoubtsByStatus } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth';
 // Dummy data for demonstration
 const dummyDoubts: Doubt[] = [
   {
@@ -32,16 +33,27 @@ const dummyDoubts: Doubt[] = [
 
 export default function TeacherDashboard() {
   const router = useRouter();
-  const [doubts, setDoubts] = useState<Doubt[]>([]);
-
+  const [pendingDoubts, setPendingDoubts] = useState<Doubt[]>([]);
+  const [reviewingDoubts, setReviewingDoubts] = useState<Doubt[]>([]);
+  const [completedDoubts, setCompletedDoubts] = useState<Doubt[]>([]);
+const {user}=useAuth()
   useEffect(() => {
-    // Simulate API call
-    setDoubts(dummyDoubts);
+    const loadDoubts = async () => {
+      try {
+        const teacherId = user?.id; // Replace with actual teacher's ID (e.g., from auth)
+        const pending = await fetchDoubtsByStatus("pending", teacherId);
+        console.log("pending",pending)
+        const reviewing = await fetchDoubtsByStatus("reviewing", teacherId);
+        const completed = await fetchDoubtsByStatus("completed", teacherId);
+        setPendingDoubts(pending);
+        setReviewingDoubts(reviewing);
+        setCompletedDoubts(completed);
+      } catch (error) {
+        console.error("Error fetching doubts:", error);
+      }
+    };
+    loadDoubts();
   }, []);
-
-  const pendingDoubts = doubts.filter(d => d.status === 'pending');
-  const reviewingDoubts = doubts.filter(d => d.status === 'reviewing');
-  const completedDoubts = doubts.filter(d => d.status === 'completed');
 
   const handleViewDetails = (id: string) => {
     router.push(`/teacher/doubt/${id}`);
@@ -52,7 +64,7 @@ export default function TeacherDashboard() {
       <NavBar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold mb-8">Teacher Dashboard</h1>
-        
+
         <Tabs defaultValue="pending" className="w-full">
           <TabsList>
             <TabsTrigger value="pending">
@@ -65,7 +77,7 @@ export default function TeacherDashboard() {
               Completed ({completedDoubts.length})
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="pending" className="space-y-4">
             {pendingDoubts.map(doubt => (
               <DoubtCard
@@ -80,7 +92,7 @@ export default function TeacherDashboard() {
               </p>
             )}
           </TabsContent>
-          
+
           <TabsContent value="reviewing" className="space-y-4">
             {reviewingDoubts.map(doubt => (
               <DoubtCard
@@ -95,7 +107,7 @@ export default function TeacherDashboard() {
               </p>
             )}
           </TabsContent>
-          
+
           <TabsContent value="completed" className="space-y-4">
             {completedDoubts.map(doubt => (
               <DoubtCard

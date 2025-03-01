@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { askFormDataType, Doubt } from "@/lib/types";
+
 export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -49,24 +50,42 @@ export async function fetchDoubtsByUserId(userId: string): Promise<Doubt[]> {
   }
   return data || [];
 }
-export async function postDoubt(formData: askFormDataType) {
-  const { title, description, subject, studentId, teacherId } = formData;
+
+export async function fetchDoubtsByStatus(
+  status: string,
+  teacherId: string | undefined
+): Promise<Doubt[]> {
   const { data, error } = await supabase
     .from("doubts")
-    .insert([
-      {
-        title,
-        description,
-        subject,
-        studentid: studentId,
-        teacherid: teacherId,
-        status: "pending",
-      },
-    ]);
+    .select("*")
+    .eq("status", status)
+    .eq("teacherid", teacherId); // Ensure field matches DB column name
+
+  if (error) {
+    console.error("Error fetching doubts by status:", error);
+    return [];
+  }
+  return data || [];
+}
+
+
+export async function postDoubt(formData: askFormDataType) {
+  const { title, description, subject, studentId, teacherId } = formData;
+  const { data, error } = await supabase.from("doubts").insert([
+    {
+      title,
+      description,
+      subject,
+      studentid: studentId,
+      teacherid: teacherId,
+      status: "pending",
+    },
+  ]);
 
   if (error) throw new Error(error.message);
   return data;
 }
+
 export const fetchTeachers = async () => {
   const { data, error } = await supabase
     .from("users")
@@ -75,7 +94,7 @@ export const fetchTeachers = async () => {
   if (error) {
     throw new Error(error.message);
   } else {
-   return data;
+    return data;
   }
 };
 // export async function postDoubt(formData: askFormDataType) {
