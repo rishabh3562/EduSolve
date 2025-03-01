@@ -7,19 +7,22 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, RefreshCw, CheckCircle, XCircle, User } from 'lucide-react';
-import { formatDistanceToNow,parseISO } from 'date-fns';
+import { Sparkles, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import { Doubt } from '@/lib/types';
-import { getDoubtById ,approveDoubt,updateDoubtWithAIAnswer} from '@/lib/supabase';
+import { getDoubtById, approveDoubt, updateDoubtWithAIAnswer } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
+import { generateGeminiAnswer } from '@/lib/aiService';
+
 export default function DoubtReview({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [doubt, setDoubt] = useState<Doubt | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [teacherAnswer, setTeacherAnswer] = useState('');
-const {user:Teacher} =useAuth();
+  const { user: Teacher } = useAuth();
+
   useEffect(() => {
     const fetchDoubt = async () => {
       const doubtData = await getDoubtById(params.id);
@@ -28,15 +31,13 @@ const {user:Teacher} =useAuth();
     fetchDoubt();
   }, [params.id]);
 
-
   const generateAnswer = async () => {
-    if (!doubt) return; // Ensure doubt is available
+    if (!doubt) return;
     setIsGenerating(true);
     try {
-      const aiAnswer = 'This is a simulated AI-generated answer using Gemini...';
-
-      await updateDoubtWithAIAnswer(doubt.id, aiAnswer); // Only called if doubt exists
-
+      const aiAnswer = await generateGeminiAnswer(doubt.description);
+      console.log("aianswer in ask",aiAnswer)
+      await updateDoubtWithAIAnswer(doubt.id, aiAnswer);
       setDoubt((prev) => (prev ? { ...prev, aiAnswer } : prev));
       setTeacherAnswer(aiAnswer);
       toast.success('Answer generated successfully');
@@ -48,10 +49,10 @@ const {user:Teacher} =useAuth();
   };
 
   const handleApprove = async () => {
-    if (!doubt) return; // Ensure doubt is available before proceeding
+    if (!doubt) return;
     setIsSubmitting(true);
     try {
-      await approveDoubt(doubt.id, teacherAnswer,Teacher?.id as string ); // Only called if doubt exists
+      await approveDoubt(doubt.id, teacherAnswer, Teacher?.id as string);
       toast.success('Doubt approved and sent to student');
       router.push('/teacher');
     } catch (error) {
@@ -60,7 +61,6 @@ const {user:Teacher} =useAuth();
       setIsSubmitting(false);
     }
   };
-
 
   if (!doubt) {
     return <div>Loading...</div>;
@@ -76,9 +76,9 @@ const {user:Teacher} =useAuth();
               <div>
                 <CardTitle className="text-2xl">{doubt.title}</CardTitle>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Posted {doubt.createdAt
-                    ? `Posted ${formatDistanceToNow(new Date(doubt.createdAt))} ago ago`
-                    : 'Unknown Date'} ago
+                  {doubt.createdAt
+                    ? `Posted ${formatDistanceToNow(new Date(doubt.createdAt))} ago`
+                    : 'Unknown Date'}
                 </p>
               </div>
               <Badge variant="secondary">{doubt.subject}</Badge>
