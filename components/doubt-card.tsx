@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Doubt } from '@/lib/types';
+import { useState ,useEffect} from 'react';
+import { Doubt, User } from '@/lib/types';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,11 +9,11 @@ import { Sparkles, RefreshCw } from 'lucide-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { toast } from 'sonner';
 import { DoubtCardProps } from '@/lib/types';
-
+import { fetchStudentById } from '@/lib/supabase';
 export function DoubtCard({ doubt, onViewDetails }: DoubtCardProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiAnswer, setAiAnswer] = useState(doubt.aiAnswer);
-
+  const [userData, setUserData] = useState<User[] | null>(null);
   const generateAnswer = async () => {
     setIsGenerating(true);
     try {
@@ -28,7 +28,16 @@ export function DoubtCard({ doubt, onViewDetails }: DoubtCardProps) {
       setIsGenerating(false);
     }
   };
-
+  useEffect(() => {
+    const fetchData = async () => {
+     
+      const data = await fetchStudentById(doubt.studentId);
+      console.log("dat",data)
+      setUserData(data);
+    };
+    fetchData();
+  }, [doubt.studentId]);
+  console.log(doubt.studentId)
   return (
     <Card className="w-full">
       <CardHeader>
@@ -38,8 +47,11 @@ export function DoubtCard({ doubt, onViewDetails }: DoubtCardProps) {
         </div>
         <CardDescription>
           Posted {doubt.createdAt
-            ? `Posted ${formatDistanceToNow(parseISO(doubt.createdAt))} ago`
+            ? `Posted ${formatDistanceToNow(parseISO(doubt.updatedAt as string))} ago`
             : 'Unknown Date'} ago
+        </CardDescription>
+        <CardDescription>
+          {userData ? `Posted by ${userData[0]?.name || 'Unknown'}` : 'Loading...'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

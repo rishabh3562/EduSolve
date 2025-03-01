@@ -28,7 +28,7 @@ export async function fetchDoubtById(
   const { data, error } = await supabase
     .from("doubts")
     .select("*")
-    .eq("studentid", id)
+    .eq("studentId", id)
     .maybeSingle(); // safer than .single()
 
   if (error) {
@@ -42,7 +42,7 @@ export async function fetchDoubtsByUserId(userId: string): Promise<Doubt[]> {
   const { data, error } = await supabase
     .from("doubts")
     .select("*")
-    .eq("studentid", userId);
+    .eq("studentId", userId);
 
   if (error) {
     console.error("Error fetching doubts:", error);
@@ -51,6 +51,31 @@ export async function fetchDoubtsByUserId(userId: string): Promise<Doubt[]> {
   return data || [];
 }
 
+//fetchuserbyid
+export async function fetchStudentById(studentId: string) {
+  const { data, error } = await supabase
+    .from("doubts")
+    .select("*")
+    .eq("studentId", studentId)
+    .single();
+  if (error) {
+    throw error;
+  } else {
+    return data;
+  }
+}
+export async function fetchTeacherById(teacherId: string) {
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("teacherId", teacherId)
+    .single();
+  if (error) {
+    throw new Error(error.message);
+  } else {
+    return data;
+  }
+}
 export async function fetchDoubtsByStatus(
   status: string,
   teacherId: string | undefined
@@ -59,7 +84,7 @@ export async function fetchDoubtsByStatus(
     .from("doubts")
     .select("*")
     .eq("status", status)
-    .eq("teacherid", teacherId); // Ensure field matches DB column name
+    .eq("teacherId", teacherId); // Ensure field matches DB column name
 
   if (error) {
     console.error("Error fetching doubts by status:", error);
@@ -76,8 +101,8 @@ export async function postDoubt(formData: askFormDataType) {
       title,
       description,
       subject,
-      studentid: studentId,
-      teacherid: teacherId,
+      studentId: studentId,
+      teacherId: teacherId,
       status: "pending",
     },
   ]);
@@ -103,7 +128,7 @@ export const fetchTeachers = async () => {
 //   const { data, error } = await supabase
 //     .from("doubts")
 //     .insert([
-//       { title, description, subject, studentid: studentId, status: "pending" },
+//       { title, description, subject, studentId: studentId, status: "pending" },
 //     ]);
 //   console.log("data", data);
 //   console.log("error", error);

@@ -8,28 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Doubt } from '@/lib/types';
 import { fetchDoubtsByStatus } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
-// Dummy data for demonstration
-const dummyDoubts: Doubt[] = [
-  {
-    id: '1',
-    title: 'Understanding Quantum Mechanics',
-    description: 'I\'m having trouble understanding the concept of quantum superposition...',
-    subject: 'Physics',
-    studentId: 'student1',
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    title: 'Integration by Parts',
-    description: 'Can someone explain when to use integration by parts?',
-    subject: 'Mathematics',
-    studentId: 'student1',
-    status: 'reviewing',
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    aiAnswer: 'Integration by parts is used when...',
-  },
-];
+
 
 export default function TeacherDashboard() {
   const router = useRouter();
