@@ -50,18 +50,16 @@ export const useAuth = create<AuthState>((set) => ({
   // Start OAuth flow for Google.
   login: async () => {
     const redirectUrl =
-      process.env.NEXT_PUBLIC_SITE_URL || "https://edusolve.vercel.app";
-    console.log("redirectUrl", redirectUrl);
+      process.env.SUPABSE_REDIRECT_URL ||
+      `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`;
+    // const redirectUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`;
+console.log("redirectUrl", redirectUrl);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: `${redirectUrl}/`,
-      },
+      options: { redirectTo: redirectUrl },
     });
 
-    if (error) {
-      console.error("Login failed:", error);
-    }
+    if (error) console.error("Login failed:", error);
   },
 
   // login: async () => {
