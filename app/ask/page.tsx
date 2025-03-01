@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { NavBar } from '@/components/nav-bar';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/lib/auth';
 import { toast } from 'sonner';
-import { postDoubt } from '@/lib/supabase';
-import { askFormDataType } from '@/lib/types';
+import { postDoubt ,supabase} from '@/lib/supabase';
+import { askFormDataType, User } from '@/lib/types';
 
 const subjects = [
   'Mathematics',
@@ -29,6 +29,7 @@ export default function AskDoubt() {
   const router = useRouter();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [teachers, setTeachers] = useState<User[]>([]); // State to store the list of teachers
 
   // Explicitly define the type for form data
   const [formData, setFormData] = useState<askFormDataType>({
@@ -36,7 +37,24 @@ export default function AskDoubt() {
     description: '',
     subject: '',
     studentId: user?.id || '',
+    teacherId: '',
   });
+
+  useEffect(() => {
+    // Fetch the list of teachers from the database
+    const fetchTeachers = async () => {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('role', 'teacher');
+      if (error) {
+        console.error('Error fetching teachers:', error);
+      } else {
+        setTeachers(data);
+      }
+    };
+    fetchTeachers();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -49,14 +67,15 @@ export default function AskDoubt() {
       toast.error('Please select a subject');
       return;
     }
-console.log("user.id",user.id)
+
     setIsSubmitting(true);
     try {
       await postDoubt({
         title: formData.title!,
         description: formData.description,
         subject: formData.subject,
-        studentId: user.id, // No need to assert non-null
+        studentId: user.id,
+        teacherId: formData.teacherId,
       });
 
       toast.success('Doubt submitted successfully');
@@ -104,6 +123,26 @@ console.log("user.id",user.id)
                     {subjects.map((subject) => (
                       <SelectItem key={subject} value={subject}>
                         {subject}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="teacher">Teacher</Label>
+                <Select
+                  value={formData.teacherId || ''} // Ensure it's never undefined
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, teacherId: value }))}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a teacher" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teachers.map((teacher) => (
+                      <SelectItem key={teacher.id} value={teacher.id}>
+                        {teacher.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

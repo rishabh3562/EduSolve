@@ -15,9 +15,10 @@ export interface askFormDataType {
   description: string;
   subject: string;
   studentId?: string;
+  teacherId?: string;
 }
 export interface User {
-  id: string | null;
+  id: string ;
   name: string;
   email: string;
   role: "student" | "teacher";

@@ -49,15 +49,45 @@ export async function fetchDoubtsByUserId(userId: string): Promise<Doubt[]> {
   }
   return data || [];
 }
-
 export async function postDoubt(formData: askFormDataType) {
-  const { title, description, subject, studentId } = formData;
-  console.log("formData", formData);
+  const { title, description, subject, studentId, teacherId } = formData;
   const { data, error } = await supabase
     .from("doubts")
-    .insert([{ title, description, subject, "studentid":studentId, status: "pending" }]);
-  console.log("data", data);
-  console.log("error", error);
+    .insert([
+      {
+        title,
+        description,
+        subject,
+        studentid: studentId,
+        teacherid: teacherId,
+        status: "pending",
+      },
+    ]);
+
   if (error) throw new Error(error.message);
   return data;
 }
+export const fetchTeachers = async () => {
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("role", "teacher");
+  if (error) {
+    throw new Error(error.message);
+  } else {
+   return data;
+  }
+};
+// export async function postDoubt(formData: askFormDataType) {
+//   const { title, description, subject, studentId } = formData;
+//   console.log("formData", formData);
+//   const { data, error } = await supabase
+//     .from("doubts")
+//     .insert([
+//       { title, description, subject, studentid: studentId, status: "pending" },
+//     ]);
+//   console.log("data", data);
+//   console.log("error", error);
+//   if (error) throw new Error(error.message);
+//   return data;
+// }
