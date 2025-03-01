@@ -117,7 +117,17 @@ export async function fetchDoubtsByStatus(
   return data || [];
 }
 
+export const updateDoubtStatus = async (id: string, status: string) => {
+  const { error } = await supabase
+    .from("doubts")
+    .update({ status })
+    .eq("id", id);
 
+  if (error) {
+    console.error("Error updating doubt status:", error);
+    throw error;
+  }
+};
 export async function postDoubt(formData: askFormDataType) {
   const { title, description, subject, studentId, teacherId } = formData;
   const { data, error } = await supabase.from("doubts").insert([
