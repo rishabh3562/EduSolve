@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Doubt } from '@/lib/types';
-import {generateGeminiAnswer} from '@/lib/aiService'
-import {updateDoubtStatus } from '@/lib/supabase';
+import { generateGeminiAnswer } from '@/lib/aiService';
+import { updateDoubtStatus } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { Sparkles, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,6 @@ export function TeacherView({ doubt, userData, onViewDetails }: TeacherViewProps
         try {
             await updateDoubtStatus(doubt.id, 'reviewing');
             toast.success('Doubt status updated to reviewing');
-            if (onViewDetails) onViewDetails(doubt.id);
         } catch {
             toast.error('Failed to update doubt status');
         }
@@ -84,7 +83,16 @@ export function TeacherView({ doubt, userData, onViewDetails }: TeacherViewProps
                         {aiAnswer ? 'Regenerate' : 'Generate'} Answer
                     </Button>
                 )}
-                {RBAC.teacher.canReviewDoubt && <Button variant="outline" size="sm" onClick={handleReview}>Review</Button>}
+                {RBAC.teacher.canReviewDoubt && (
+                    <Button variant="outline" size="sm" onClick={handleReview}>
+                        Review
+                    </Button>
+                )}
+                {RBAC.teacher.canViewDetails && onViewDetails && (
+                    <Button variant="ghost" size="sm" onClick={() => onViewDetails(doubt.id)}>
+                        View Details
+                    </Button>
+                )}
             </CardFooter>
         </Card>
     );

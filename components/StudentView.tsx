@@ -25,11 +25,20 @@ export function StudentView({ doubt, userData }: StudentViewProps) {
 
             <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">{doubt.description}</p>
+
                 {doubt.status === 'reviewing' && (
                     <div className="bg-yellow-100 p-3 rounded-md border border-yellow-400">
                         <p className="text-yellow-800 text-sm font-medium">
                             Your doubt is currently under review. You will get an answer soon!
                         </p>
+                    </div>
+                )}
+
+                {/* Show Teacher's Answer when completed */}
+                {doubt.status === 'completed' && doubt.teacherAnswer && (
+                    <div className="bg-green-100 p-4 rounded-lg border border-green-400 shadow-md">
+                        <h4 className="font-semibold text-green-900 mb-2">Teacher's Answer:</h4>
+                        <p className="text-sm text-green-800">{doubt.teacherAnswer}</p>
                     </div>
                 )}
             </CardContent>

@@ -5,16 +5,19 @@ export const RBAC = {
     canViewAnswers: false,
     canGenerateAnswer: false,
     canReviewDoubt: false,
+    canViewDetails: false,
   },
   teacher: {
     canViewAnswers: true,
     canGenerateAnswer: true,
     canReviewDoubt: true,
+    canViewDetails: true,
   },
   admin: {
     canViewAnswers: true,
     canGenerateAnswer: true,
     canReviewDoubt: true,
+    canViewDetails: true,
   },
 };
 

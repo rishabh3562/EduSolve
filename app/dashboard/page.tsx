@@ -1,11 +1,10 @@
-'use client';
-
+"use client"
 import { useEffect, useState } from 'react';
 import { NavBar } from '@/components/nav-bar';
 import { DoubtCard } from '@/components/doubt-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Info } from 'lucide-react';
 import { Doubt } from '@/lib/types';
 import Link from 'next/link';
 import { fetchDoubtsByUserId } from '@/lib/supabase';
@@ -35,12 +34,12 @@ export default function Dashboard() {
 
   const pendingDoubts = doubts.filter(d => d.status === 'pending');
   const completedDoubts = doubts.filter(d => d.status === 'completed');
-
+  const reviewingDoubts = doubts.filter(d => d.status === 'reviewing')
   return (
     <div className="min-h-screen bg-background">
       <NavBar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold">Your Doubts</h1>
           <Link href="/ask">
             <Button className="gap-2">
@@ -50,10 +49,21 @@ export default function Dashboard() {
           </Link>
         </div>
 
+        {/* Info message about Reviewing stage */}
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6 rounded-md flex items-start">
+          <Info className="h-5 w-5 text-yellow-600 mr-2" />
+          <p className="text-sm text-yellow-800">
+            If you don’t see your doubts in the <strong>Pending</strong> or <strong>Completed</strong> columns, they might be in the <strong>Reviewing</strong> stage. You will get them soon!
+          </p>
+        </div>
+
         <Tabs defaultValue="pending" className="w-full">
           <TabsList>
             <TabsTrigger value="pending">
               Pending ({pendingDoubts.length})
+            </TabsTrigger>
+            <TabsTrigger value="reviewing">
+              Reviewing ({reviewingDoubts.length})
             </TabsTrigger>
             <TabsTrigger value="completed">
               Completed ({completedDoubts.length})
@@ -63,6 +73,15 @@ export default function Dashboard() {
           <TabsContent value="pending" className="space-y-4">
             {pendingDoubts.length > 0 ? (
               pendingDoubts.map(doubt => (
+                <DoubtCard key={doubt.id} doubt={doubt} />
+              ))
+            ) : (
+              <p className="text-center text-muted-foreground py-8">No pending doubts</p>
+            )}
+          </TabsContent>
+          <TabsContent value="reviewing" className="space-y-4">
+            {reviewingDoubts.length > 0 ? (
+              reviewingDoubts.map(doubt => (
                 <DoubtCard key={doubt.id} doubt={doubt} />
               ))
             ) : (
