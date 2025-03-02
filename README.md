@@ -1,4 +1,4 @@
-# EduSolve# EduSolve
+# EduSolve
 
 EduSolve is a doubt-solving platform designed to help teachers manage and respond to student queries efficiently. Built using **Supabase**, **Next.js 13 (App Router)**, and **TypeScript**, it streamlines the process of doubt resolution by incorporating AI-powered assistance via **Gemini API**.
 
@@ -31,6 +31,10 @@ Teachers often get overwhelmed with a high volume of student doubts. EduSolve si
 
 ## 📸 Screenshots
 (Add screenshots here)
+![image](https://github.com/user-attachments/assets/373b164b-f484-40ba-b20f-d1ae1bfa25a0)
+![image](https://github.com/user-attachments/assets/9ae79bcc-b3a7-4adc-9ef4-52c48cf35c2b)
+![image](https://github.com/user-attachments/assets/ad21335d-71d9-4bd0-8e2a-309f2c9689ac)
+![image](https://github.com/user-attachments/assets/62d06325-98a2-4427-be30-9d3dc2b5bb74)
 
 ---
 
@@ -78,7 +82,4 @@ Feel free to submit issues or pull requests to improve EduSolve!
 
 
 ---
-
-### 🔗 Connect with Me
-(Your social links or GitHub profile)
 
