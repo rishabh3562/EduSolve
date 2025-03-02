@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-
+import { Loader2 } from "lucide-react"; // Loader icon from shadcn/ui
 const publicRoutes = ["/", "/login", "/auth/callback"];
 const studentRoutes = ["/dashboard", "/ask"];
 const teacherRoutes = ["/teacher", "/teacher/doubt"];
@@ -20,26 +21,25 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       setLoading(false);
     };
     initialize();
-  }, [init]);
+  }, []);
 
   useEffect(() => {
     if (loading) return;
 
     if (!user && !publicRoutes.includes(pathname)) {
       router.push("/login");
-      return;
-    }
-    if (user?.role === "student" && pathname.startsWith("/teacher")) {
+    } else if (user?.role === "student" && pathname.startsWith("/teacher")) {
       router.push("/dashboard");
-      return;
-    }
-    if (user?.role === "teacher" && studentRoutes.includes(pathname)) {
+    } else if (user?.role === "teacher" && studentRoutes.includes(pathname)) {
       router.push("/teacher");
-      return;
     }
   }, [user, pathname, router, loading]);
 
-  if (loading) return <div>Loading...</div>; // Prevents flashing
-
-  return <>{children}</>;
+  return loading ? (
+    <div className="flex h-screen items-center justify-center">
+      <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
+    </div>
+  ) : (
+    <>{children}</>
+  );
 }
