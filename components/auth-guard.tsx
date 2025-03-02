@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 
@@ -12,29 +12,34 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, init } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [loading, setLoading] = useState(true);
 
-  // Run initialization to set the user state.
   useEffect(() => {
-    init();
+    const initialize = async () => {
+      await init();
+      setLoading(false);
+    };
+    initialize();
   }, [init]);
 
   useEffect(() => {
-    // If not logged in and not on a public route, redirect to login.
+    if (loading) return;
+
     if (!user && !publicRoutes.includes(pathname)) {
       router.push("/login");
       return;
     }
-    // Prevent students from accessing teacher routes.
     if (user?.role === "student" && pathname.startsWith("/teacher")) {
       router.push("/dashboard");
       return;
     }
-    // Prevent teachers from accessing student routes.
     if (user?.role === "teacher" && studentRoutes.includes(pathname)) {
       router.push("/teacher");
       return;
     }
-  }, [user, pathname, router]);
+  }, [user, pathname, router, loading]);
+
+  if (loading) return <div>Loading...</div>; // Prevents flashing
 
   return <>{children}</>;
 }
