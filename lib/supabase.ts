@@ -34,32 +34,49 @@ export async function getCurrentUser() {
 }
 // Fetch doubt by ID
 export const getDoubtById = async (id: string): Promise<Doubt | null> => {
-  const { data, error } = await supabase.from('doubts').select('*').eq('id', id).single();
+  const { data, error } = await supabase
+    .from("doubts")
+    .select("*")
+    .eq("id", id)
+    .single();
   if (error) {
-    console.error('Error fetching doubt:', error);
+    console.error("Error fetching doubt:", error);
     return null;
   }
   return data;
 };
 // Update doubt with AI-generated answer
-export const updateDoubtWithAIAnswer = async (id: string |null, aiAnswer: string) => {
-  const { error } = await supabase.from('doubts').update({ aiAnswer }).eq('id', id);
+export const updateDoubtWithAIAnswer = async (
+  id: string | null,
+  aiAnswer: string
+) => {
+  const { error } = await supabase
+    .from("doubts")
+    .update({ aiAnswer })
+    .eq("id", id);
   if (error) {
-    console.error('Error updating AI answer:', error);
+    console.error("Error updating AI answer:", error);
     throw error;
   }
 };
 // Approve doubt and update teacher's answer
-export const approveDoubt = async (id: string, teacherAnswer: string, teacherId: string) => {
-  const { error } = await supabase.from('doubts').update({
-    teacherAnswer,
-    teacherId,
-    status: 'completed',
-    updatedAt: new Date().toISOString(),
-  }).eq('id', id);
-  
+export const approveDoubt = async (
+  id: string,
+  teacherAnswer: string,
+  teacherId: string
+) => {
+  const { error } = await supabase
+    .from("doubts")
+    .update({
+      teacherAnswer,
+      teacherId,
+      status: "completed",
+      updatedAt: new Date().toISOString(),
+    })
+    .eq("id", id);
+
   if (error) {
-    console.error('Error approving doubt:', error);
+    console.error("Error approving doubt:", error);
     throw error;
   }
 };
@@ -81,7 +98,7 @@ export async function fetchStudentById(studentId: string) {
   const { data, error } = await supabase
     .from("users")
     .select("*")
-    .eq("id", studentId)
+    .eq("id", studentId);
   if (error) {
     throw error;
   } else {
@@ -108,7 +125,8 @@ export async function fetchDoubtsByStatus(
     .from("doubts")
     .select("*")
     .eq("status", status)
-    .eq("teacherId", teacherId); // Ensure field matches DB column name
+    .eq("teacherId", teacherId)
+    .order("createdAt", { ascending: false }); // Sort by most recent
 
   if (error) {
     console.error("Error fetching doubts by status:", error);
