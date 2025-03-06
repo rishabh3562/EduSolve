@@ -9,29 +9,62 @@ const genAI = new GoogleGenerativeAI(
  * @param {string} question - The student's question.
  * @returns {Promise<string>} - The AI-generated teacher response.
  */
-export async function generateGeminiAnswer(question: string): Promise<string> {
+
+export async function generateGeminiAnswer(
+  title: string,
+  description: string
+): Promise<string> {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const prompt = `
-      You are a teacher. Answer student questions in a short, clear, and precise manner.
-      If a student uses abusive language, respond with:
-      "Please do not use abusive language. This platform is monitored, and misuse can lead to legal consequences."
+const prompt = `
+  You are a knowledgeable teacher. Answer student questions clearly, concisely, and accurately.  
 
-      Student: ${question}
-    `;
+  - Your first approach should be to **answer the question** based on the available information.  
+  - If either the title or description is meaningful, **focus on that and provide an answer**.  
+  - If one is unclear (random characters, numbers, or empty), ignore it and answer based on the meaningful part.  
+  - If both are unclear and you truly cannot infer meaning, only then ask for clarification.  
+  - Be prepared to answer variations of the same question, as students may ask in different ways.  
+  - If the question is vague but still answerable, provide the best possible response.  
+  - **Assume the context of a technical trainer answering a student's question.**  
 
-    // console.log("Sending request to Gemini API...");
-    // console.log("Prompt:", prompt);
+  **Student's Question Title:** ${title}  
+  **Student's Question Description:** ${description}  
+`;
 
-    const result = await model.generateContent(prompt); // Directly send the prompt
 
-    const text = result?.response?.text() || "No response generated.";
 
-    // console.log("AI Teacher Response:", text);
-    return text;
+    const result = await model.generateContent(prompt);
+    return result?.response?.text() || "No response generated.";
   } catch (error) {
-    // console.error("Gemini API Error:", error);
     throw new Error("Failed to generate answer.");
   }
 }
+
+
+// export async function generateGeminiAnswer(question: string): Promise<string> {
+//   try {
+//     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+//     const prompt = `
+//       You are a teacher. Answer student questions in a short, clear, and precise manner.
+//       If a student uses abusive language, respond with:
+//       "Please do not use abusive language. This platform is monitored, and misuse can lead to legal consequences."
+
+//       Student: ${question}
+//     `;
+
+//     // console.log("Sending request to Gemini API...");
+//     // console.log("Prompt:", prompt);
+
+//     const result = await model.generateContent(prompt); // Directly send the prompt
+
+//     const text = result?.response?.text() || "No response generated.";
+
+//     // console.log("AI Teacher Response:", text);
+//     return text;
+//   } catch (error) {
+//     // console.error("Gemini API Error:", error);
+//     throw new Error("Failed to generate answer.");
+//   }
+// }

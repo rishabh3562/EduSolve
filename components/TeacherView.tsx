@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { use, useState } from 'react';
 import { Doubt } from '@/lib/types';
 import { generateGeminiAnswer } from '@/lib/aiService';
-import { updateDoubtStatus } from '@/lib/supabase';
+import { updateDoubtStatus, updateAiAnswer, updateApiUsage } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { Sparkles, RefreshCw, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { RBAC } from '@/lib/rbac';
-
+import { useAuth } from '@/lib/auth';
 interface TeacherViewProps {
     doubt: Doubt;
     userData: any;
@@ -21,19 +21,31 @@ export function TeacherView({ doubt, userData, onViewDetails }: TeacherViewProps
     const [aiAnswer, setAiAnswer] = useState(doubt.aiAnswer);
     const [isUpdating, setIsUpdating] = useState(false);
     const [showFullDesc, setShowFullDesc] = useState(false);
-
+    const {user}=useAuth();
+    console.log("userData",userData)
     const generateAnswer = async () => {
         setIsGenerating(true);
         try {
-            const newAnswer = await generateGeminiAnswer(doubt.description);
+            const newAnswer = await generateGeminiAnswer(doubt.title, doubt.description);
             setAiAnswer(newAnswer);
-            toast.success('Answer generated successfully');
+
+            // Save AI answer
+            await updateAiAnswer(doubt.id, newAnswer);
+
+            // Update API usage
+            const tokensUsed = newAnswer.length; // Approximate token count
+           
+            (user?.id && await updateApiUsage(user.id, tokensUsed))
+
+            toast.success('Answer generated and saved successfully');
         } catch {
             toast.error('Failed to generate answer');
         } finally {
             setIsGenerating(false);
         }
     };
+
+
 
     const handleReview = async () => {
         setIsUpdating(true);

@@ -19,13 +19,27 @@ export interface askFormDataType {
   teacherId?: string;
 }
 export interface User {
-  id: string ;
+  id: string;
   name: string;
   email: string;
   role: "student" | "teacher";
+  isBanned?: boolean;
 }
 export interface DoubtCardProps {
   doubt: Doubt;
+  onViewDetails?: (id: string) => void;
+}
+export interface ApiUsage {
+   id: string; 
+   userId: string;
+   totalTokens: number;
+   maxTokens: number;
+   createdAt?: string;
+   updatedAt?: string;
+}
+export interface TeacherViewProps {
+  doubt: Doubt;
+  userData: User | null;
   onViewDetails?: (id: string) => void;
 }
 
