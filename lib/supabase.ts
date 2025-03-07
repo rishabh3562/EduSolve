@@ -307,7 +307,20 @@ export async function fetchUsersByRole(role: "student" | "teacher") {
   if (error) throw new Error("Failed to fetch users.");
   return data;
 }
+export async function fetchDoubtById(id: string): Promise<Doubt | null> {
+  const { data, error } = await supabase
+    .from("doubts")
+    .select("*")
+    .eq("id", id)
+    .single();
 
+  if (error) {
+    console.error("Error fetching doubt:", error);
+    return null;
+  }
+
+  return data;
+}
 export async function resetApiUsage() {
   const { error } = await supabase.from("apiUsage").update({ totalTokens: 0 });
 

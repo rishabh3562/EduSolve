@@ -14,6 +14,11 @@ import { Doubt } from '@/lib/types';
 import { getDoubtById, approveDoubt, updateDoubtWithAIAnswer } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 import { generateGeminiAnswer } from '@/lib/aiService';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github-dark.css';
 
 export default function DoubtReview({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -21,6 +26,7 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [teacherAnswer, setTeacherAnswer] = useState('');
+  const [context, setContext] = useState('');
   const { user: Teacher } = useAuth();
 
   useEffect(() => {
@@ -35,11 +41,10 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
     if (!doubt) return;
     setIsGenerating(true);
     try {
-      const aiAnswer = await generateGeminiAnswer(doubt.description);
-      // console.log("aianswer in ask",aiAnswer)
+      const aiAnswer = await generateGeminiAnswer(doubt.title, doubt.description, context);
       await updateDoubtWithAIAnswer(doubt.id, aiAnswer);
       setDoubt((prev) => (prev ? { ...prev, aiAnswer } : prev));
-      setTeacherAnswer(aiAnswer);
+      setTeacherAnswer(aiAnswer || '');
       toast.success('Answer generated successfully');
     } catch (error) {
       toast.error('Failed to generate answer');
@@ -90,15 +95,20 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
               <p className="text-sm">{doubt.description}</p>
             </div>
 
+            <div className="space-y-2">
+              <h3 className="font-medium">Additional Context:</h3>
+              <Textarea
+                value={context}
+                onChange={(e) => setContext(e.target.value)}
+                placeholder="Provide extra details to improve AI's response..."
+                className="min-h-[100px]"
+              />
+            </div>
+
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="font-medium">AI-Generated Answer:</h3>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={generateAnswer}
-                  disabled={isGenerating}
-                >
+                <Button variant="secondary" size="sm" onClick={generateAnswer} disabled={isGenerating}>
                   {isGenerating ? (
                     <RefreshCw className="h-4 w-4 animate-spin mr-2" />
                   ) : (
@@ -109,7 +119,13 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
               </div>
               {doubt.aiAnswer && (
                 <div className="bg-secondary p-4 rounded-lg">
-                  <p className="text-sm">{doubt.aiAnswer}</p>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeHighlight]}
+                   
+                  >
+                    {doubt.aiAnswer}
+                  </ReactMarkdown>
                 </div>
               )}
             </div>
@@ -122,21 +138,21 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
                 placeholder="Edit or write your own answer..."
                 className="min-h-[200px]"
               />
+              {teacherAnswer && (
+                <div className="bg-secondary p-4 rounded-lg">
+                  <ReactMarkdown>{teacherAnswer}</ReactMarkdown>
+                </div>
+              )}
             </div>
+
+
           </CardContent>
           <CardFooter className="flex justify-end gap-4">
-            <Button
-              variant="outline"
-              onClick={() => router.push('/teacher')}
-              disabled={isSubmitting}
-            >
+            <Button variant="outline" onClick={() => router.push('/teacher')} disabled={isSubmitting}>
               <XCircle className="h-4 w-4 mr-2" />
               Cancel
             </Button>
-            <Button
-              onClick={handleApprove}
-              disabled={isSubmitting || !teacherAnswer}
-            >
+            <Button onClick={handleApprove} disabled={isSubmitting}>
               <CheckCircle className="h-4 w-4 mr-2" />
               Approve & Send
             </Button>

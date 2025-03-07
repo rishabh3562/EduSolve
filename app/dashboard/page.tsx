@@ -1,14 +1,14 @@
-"use client"
-import { useEffect, useState } from 'react';
-import { NavBar } from '@/components/nav-bar';
-import { DoubtCard } from '@/components/doubt-card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { PlusCircle, Info } from 'lucide-react';
-import { Doubt } from '@/lib/types';
-import Link from 'next/link';
-import { fetchDoubtsByUserId } from '@/lib/supabase';
-import { useAuth } from '@/lib/auth';
+"use client";
+import { useEffect, useState } from "react";
+import { NavBar } from "@/components/nav-bar";
+import { DoubtCard } from "@/components/doubt-card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { PlusCircle, Info } from "lucide-react";
+import { Doubt } from "@/lib/types";
+import Link from "next/link";
+import { fetchDoubtsByUserId } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth";
 
 export default function Dashboard() {
   const [doubts, setDoubts] = useState<Doubt[] | null>(null);
@@ -17,14 +17,14 @@ export default function Dashboard() {
   useEffect(() => {
     const loadDoubts = async () => {
       if (user?.id) {
-        const data = await fetchDoubtsByUserId(user.id);
+        const data: Doubt[] | null = await fetchDoubtsByUserId(user.id);
         setDoubts(data);
       }
     };
     loadDoubts();
   }, [user]);
 
-  if (doubts === null) {
+  if (!doubts) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-muted-foreground">Loading doubts...</p>
@@ -32,9 +32,10 @@ export default function Dashboard() {
     );
   }
 
-  const pendingDoubts = doubts.filter(d => d.status === 'pending');
-  const completedDoubts = doubts.filter(d => d.status === 'completed');
-  const reviewingDoubts = doubts.filter(d => d.status === 'reviewing')
+  const pendingDoubts = doubts.filter((d) => d.status === "pending");
+  const completedDoubts = doubts.filter((d) => d.status === "completed");
+  const reviewingDoubts = doubts.filter((d) => d.status === "reviewing");
+
   return (
     <div className="min-h-screen bg-background">
       <NavBar />
@@ -53,7 +54,9 @@ export default function Dashboard() {
         <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6 rounded-md flex items-start">
           <Info className="h-5 w-5 text-yellow-600 mr-2" />
           <p className="text-sm text-yellow-800">
-            If you don’t see your doubts in the <strong>Pending</strong> or <strong>Completed</strong> columns, they might be in the <strong>Reviewing</strong> stage. You will get them soon!
+            If you don’t see your doubts in the <strong>Pending</strong> or{" "}
+            <strong>Completed</strong> columns, they might be in the{" "}
+            <strong>Reviewing</strong> stage. You will get them soon!
           </p>
         </div>
 
@@ -72,30 +75,43 @@ export default function Dashboard() {
 
           <TabsContent value="pending" className="space-y-4">
             {pendingDoubts.length > 0 ? (
-              pendingDoubts.map(doubt => (
-                <DoubtCard key={doubt.id} doubt={doubt} />
+              pendingDoubts.map((doubt) => (
+                <Link key={doubt.id} href={`/dashboard/${doubt.id}`}>
+                  <DoubtCard doubt={doubt} />
+                </Link>
               ))
             ) : (
-              <p className="text-center text-muted-foreground py-8">No pending doubts</p>
+              <p className="text-center text-muted-foreground py-8">
+                No pending doubts
+              </p>
             )}
           </TabsContent>
+
           <TabsContent value="reviewing" className="space-y-4">
             {reviewingDoubts.length > 0 ? (
-              reviewingDoubts.map(doubt => (
-                <DoubtCard key={doubt.id} doubt={doubt} />
+              reviewingDoubts.map((doubt) => (
+                <Link key={doubt.id} href={`/dashboard/${doubt.id}`}>
+                  <DoubtCard doubt={doubt} />
+                </Link>
               ))
             ) : (
-              <p className="text-center text-muted-foreground py-8">No pending doubts</p>
+              <p className="text-center text-muted-foreground py-8">
+                No reviewing doubts
+              </p>
             )}
           </TabsContent>
 
           <TabsContent value="completed" className="space-y-4">
             {completedDoubts.length > 0 ? (
-              completedDoubts.map(doubt => (
-                <DoubtCard key={doubt.id} doubt={doubt} />
+              completedDoubts.map((doubt) => (
+                <Link key={doubt.id} href={`/dashboard/${doubt.id}`}>
+                  <DoubtCard doubt={doubt} />
+                </Link>
               ))
             ) : (
-              <p className="text-center text-muted-foreground py-8">No completed doubts</p>
+              <p className="text-center text-muted-foreground py-8">
+                No completed doubts
+              </p>
             )}
           </TabsContent>
         </Tabs>
