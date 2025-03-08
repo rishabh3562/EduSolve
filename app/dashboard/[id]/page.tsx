@@ -51,7 +51,7 @@ export default function Page({ params }: PageProps) {
         <>
             <NavBar />
 
-            <main className="max-w-2xl mx-auto p-6">
+            <main className="md:max-w-4xl max-w-2xl mx-auto p-6">
                 {/* Back Button */}
                 <Button variant="outline" onClick={() => router.back()} className="mb-4 flex items-center gap-2">
                     <ArrowLeft className="h-5 w-5" />

@@ -2,7 +2,11 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { Doubt } from '@/lib/types';
-
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github-dark.css';
 interface StudentViewProps {
     doubt: Doubt;
     userData: any;
@@ -38,7 +42,14 @@ export function StudentView({ doubt, userData }: StudentViewProps) {
                 {doubt.status === 'completed' && doubt.teacherAnswer && (
                     <div className="bg-green-100 p-4 rounded-lg border border-green-400 shadow-md">
                         <h4 className="font-semibold text-green-900 mb-2">Teacher's Answer:</h4>
-                        <p className="text-sm text-green-800">{doubt.teacherAnswer}</p>
+                        <p className="text-sm text-green-800">
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm, remarkMath]}
+                                rehypePlugins={[rehypeHighlight]}
+                            >
+                                {doubt.teacherAnswer}
+                            </ReactMarkdown>
+                            </p>
                     </div>
                 )}
             </CardContent>
