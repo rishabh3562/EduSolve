@@ -99,7 +99,8 @@ export async function fetchDoubtsByUserId(userId: string): Promise<Doubt[]> {
   const { data, error } = await supabase
     .from("doubts")
     .select("*")
-    .eq("studentId", userId);
+    .eq("studentId", userId)
+    .order("createdAt", { ascending: false }); ;
 
   if (error) {
     console.error("Error fetching doubts:", error);

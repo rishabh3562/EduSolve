@@ -4,15 +4,20 @@ import { NavBar } from "@/components/nav-bar";
 import { DoubtCard } from "@/components/doubt-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Info } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { Doubt } from "@/lib/types";
 import Link from "next/link";
 import { fetchDoubtsByUserId } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
+import ReactPaginate from "react-paginate";
+import { SearchBar } from "@/components/SearchBar";
 
 export default function Dashboard() {
   const [doubts, setDoubts] = useState<Doubt[] | null>(null);
   const { user } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const loadDoubts = async () => {
@@ -32,16 +37,26 @@ export default function Dashboard() {
     );
   }
 
-  const pendingDoubts = doubts.filter((d) => d.status === "pending");
-  const completedDoubts = doubts.filter((d) => d.status === "completed");
-  const reviewingDoubts = doubts.filter((d) => d.status === "reviewing");
+  const filteredDoubts = doubts.filter((d) =>
+    d.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const pendingDoubts = filteredDoubts.filter((d) => d.status === "pending");
+  const completedDoubts = filteredDoubts.filter((d) => d.status === "completed");
+  const reviewingDoubts = filteredDoubts.filter((d) => d.status === "reviewing");
+
+  const paginatedDoubts = (doubts: Doubt[]) => {
+    const start = currentPage * itemsPerPage;
+    return doubts.slice(start, start + itemsPerPage);
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <NavBar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between items-center mb-4 gap-4">
           <h1 className="text-3xl font-bold">Your Doubts</h1>
+         
           <Link href="/ask">
             <Button className="gap-2">
               <PlusCircle className="h-5 w-5" />
@@ -49,71 +64,40 @@ export default function Dashboard() {
             </Button>
           </Link>
         </div>
-
-        {/* Info message about Reviewing stage */}
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6 rounded-md flex items-start">
-          <Info className="h-5 w-5 text-yellow-600 mr-2" />
-          <p className="text-sm text-yellow-800">
-            If you don’t see your doubts in the <strong>Pending</strong> or{" "}
-            <strong>Completed</strong> columns, they might be in the{" "}
-            <strong>Reviewing</strong> stage. You will get them soon!
-          </p>
-        </div>
-
+        <SearchBar onSearch={setSearchTerm} />
         <Tabs defaultValue="pending" className="w-full">
           <TabsList>
-            <TabsTrigger value="pending">
-              Pending ({pendingDoubts.length})
-            </TabsTrigger>
-            <TabsTrigger value="reviewing">
-              Reviewing ({reviewingDoubts.length})
-            </TabsTrigger>
-            <TabsTrigger value="completed">
-              Completed ({completedDoubts.length})
-            </TabsTrigger>
+            <TabsTrigger value="pending">Pending ({pendingDoubts.length})</TabsTrigger>
+            <TabsTrigger value="reviewing">Reviewing ({reviewingDoubts.length})</TabsTrigger>
+            <TabsTrigger value="completed">Completed ({completedDoubts.length})</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="pending" className="space-y-4">
-            {pendingDoubts.length > 0 ? (
-              pendingDoubts.map((doubt) => (
-                <Link key={doubt.id} href={`/dashboard/${doubt.id}`}>
-                  <DoubtCard doubt={doubt} />
-                </Link>
-              ))
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                No pending doubts
-              </p>
-            )}
-          </TabsContent>
-
-          <TabsContent value="reviewing" className="space-y-4">
-            {reviewingDoubts.length > 0 ? (
-              reviewingDoubts.map((doubt) => (
-                <Link key={doubt.id} href={`/dashboard/${doubt.id}`}>
-                  <DoubtCard doubt={doubt} />
-                </Link>
-              ))
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                No reviewing doubts
-              </p>
-            )}
-          </TabsContent>
-
-          <TabsContent value="completed" className="space-y-4">
-            {completedDoubts.length > 0 ? (
-              completedDoubts.map((doubt) => (
-                <Link key={doubt.id} href={`/dashboard/${doubt.id}`}>
-                  <DoubtCard doubt={doubt} />
-                </Link>
-              ))
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                No completed doubts
-              </p>
-            )}
-          </TabsContent>
+          {['pending', 'reviewing', 'completed'].map((status) => {
+            const statusDoubts = status === "pending" ? pendingDoubts : status === "reviewing" ? reviewingDoubts : completedDoubts;
+            return (
+              <TabsContent key={status} value={status} className="space-y-4">
+                {statusDoubts.length > 0 ? (
+                  paginatedDoubts(statusDoubts).map((doubt) => (
+                    <Link key={doubt.id} href={`/dashboard/${doubt.id}`}>
+                      <DoubtCard doubt={doubt} />
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">No {status} doubts</p>
+                )}
+                <ReactPaginate
+                  previousLabel={"←"}
+                  nextLabel={"→"}
+                  pageCount={Math.ceil(statusDoubts.length / itemsPerPage)}
+                  onPageChange={({ selected }) => setCurrentPage(selected)}
+                  containerClassName="flex justify-center space-x-2 mt-4"
+                  pageClassName="border rounded-md px-3 py-1"
+                  activeClassName="bg-gray-200 font-bold"
+                  disabledClassName="text-gray-400"
+                />
+              </TabsContent>
+            );
+          })}
         </Tabs>
       </main>
     </div>
