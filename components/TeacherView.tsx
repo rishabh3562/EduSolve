@@ -1,7 +1,7 @@
 import { use, useState } from 'react';
 import { Doubt } from '@/lib/types';
 import { generateGeminiAnswer } from '@/lib/aiService';
-import { updateDoubtStatus, updateAiAnswer, updateApiUsage } from '@/lib/supabase';
+import { updateDoubtStatus, updateAiAnswer, updateApiUsage,fetchApiUsage } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { Sparkles, RefreshCw, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -60,6 +60,15 @@ export function TeacherView({ doubt, userData, onViewDetails }: TeacherViewProps
     const {user}=useAuth();
     // console.log("userData",userData)
     const generateAnswer = async () => {
+        if (!doubt || !user?.id) return;
+
+        // Fetch API usage data
+        const usageData = await fetchApiUsage(user.id);
+        if (!usageData || usageData.totalTokens >= usageData.maxTokens) {
+            toast.error('API quota exhausted. Upgrade or wait for reset.');
+            return;
+        }
+
         setIsGenerating(true);
         try {
             const newAnswer = await generateGeminiAnswer(doubt.title, doubt.description);
@@ -69,9 +78,8 @@ export function TeacherView({ doubt, userData, onViewDetails }: TeacherViewProps
             await updateAiAnswer(doubt.id, newAnswer);
 
             // Update API usage
-            const tokensUsed = newAnswer.length; // Approximate token count
-           
-            (user?.id && await updateApiUsage(user.id, tokensUsed))
+            const tokensUsed = newAnswer.length;
+            await updateApiUsage(user.id, tokensUsed);
 
             toast.success('Answer generated and saved successfully');
         } catch {
@@ -80,6 +88,7 @@ export function TeacherView({ doubt, userData, onViewDetails }: TeacherViewProps
             setIsGenerating(false);
         }
     };
+
 
 
 

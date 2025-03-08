@@ -11,7 +11,7 @@ import { Sparkles, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 import { Doubt } from '@/lib/types';
-import { getDoubtById, approveDoubt, updateDoubtWithAIAnswer } from '@/lib/supabase';
+import { getDoubtById, approveDoubt, updateDoubtWithAIAnswer,updateAiAnswer,updateApiUsage ,fetchApiUsage} from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 import { generateGeminiAnswer } from '@/lib/aiService';
 import ReactMarkdown from 'react-markdown';
@@ -43,20 +43,36 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
 
 
   const generateAnswer = async () => {
-    if (!doubt) return;
+    if (!doubt || !Teacher?.id) return;
+
+    // Fetch the teacher's API usage quota
+    const usageData = await fetchApiUsage(Teacher.id);
+    if (!usageData || usageData.totalTokens >= usageData.maxTokens) {
+      toast.error('API quota exhausted. Upgrade or wait for reset.');
+      return;
+    }
+
     setIsGenerating(true);
     try {
       const aiAnswer = await generateGeminiAnswer(doubt.title, doubt.description, context);
-      await updateDoubtWithAIAnswer(doubt.id, aiAnswer);
+      setTeacherAnswer(aiAnswer);
       setDoubt((prev) => (prev ? { ...prev, aiAnswer } : prev));
-      setTeacherAnswer(aiAnswer || '');
-      toast.success('Answer generated successfully');
-    } catch (error) {
+
+      // Save AI answer
+      await updateDoubtWithAIAnswer(doubt.id, aiAnswer);
+
+      // Update API usage
+      const tokensUsed = aiAnswer.length;
+      await updateApiUsage(Teacher.id, tokensUsed);
+
+      toast.success('Answer generated and saved successfully');
+    } catch {
       toast.error('Failed to generate answer');
     } finally {
       setIsGenerating(false);
     }
   };
+
 
   const handleApprove = async () => {
     if (!doubt) return;
