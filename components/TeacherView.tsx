@@ -10,19 +10,55 @@ import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { RBAC } from '@/lib/rbac';
 import { useAuth } from '@/lib/auth';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github-dark.css';
 interface TeacherViewProps {
     doubt: Doubt;
     userData: any;
     onViewDetails?: (id: string) => void;
 }
+const AnswerSection = ({ aiAnswer, doubt }:any) => {
+    return (
+        <>
+            {aiAnswer && (
+                <div className="bg-blue-100 p-3 rounded-md border border-blue-400">
+                    <h4 className="font-medium text-blue-900 mb-1">AI Answer:</h4>
+                    <ReactMarkdown
+                        remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[rehypeHighlight]}
+                      
+                    >
+                        {aiAnswer}
+                    </ReactMarkdown>
+                </div>
+            )}
+            {doubt.teacherAnswer && (
+                <div className="bg-green-100 p-3 rounded-md border border-green-400">
+                    <h4 className="font-medium text-green-900 mb-1">Teacher's Answer:</h4>
+                    <ReactMarkdown
+                        remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[rehypeHighlight]}
+                     
+                    >
+                        {doubt.teacherAnswer}
+                    </ReactMarkdown>
+                </div>
+            )}
+        </>
+    );
+};
 
+// export default AnswerSection;
 export function TeacherView({ doubt, userData, onViewDetails }: TeacherViewProps) {
     const [isGenerating, setIsGenerating] = useState(false);
     const [aiAnswer, setAiAnswer] = useState(doubt.aiAnswer);
     const [isUpdating, setIsUpdating] = useState(false);
     const [showFullDesc, setShowFullDesc] = useState(false);
     const {user}=useAuth();
-    console.log("userData",userData)
+    // console.log("userData",userData)
     const generateAnswer = async () => {
         setIsGenerating(true);
         try {
@@ -84,19 +120,9 @@ export function TeacherView({ doubt, userData, onViewDetails }: TeacherViewProps
                 </p>
 
                 {RBAC.teacher.canViewAnswers && (
+                      
                     <div className="space-y-3">
-                        {aiAnswer && (
-                            <div className="bg-blue-100 p-3 rounded-md border border-blue-400">
-                                <h4 className="font-medium text-blue-900 mb-1">AI Answer:</h4>
-                                <p className="text-sm text-blue-800">{aiAnswer}</p>
-                            </div>
-                        )}
-                        {doubt.teacherAnswer && (
-                            <div className="bg-green-100 p-3 rounded-md border border-green-400">
-                                <h4 className="font-medium text-green-900 mb-1">Teacher's Answer:</h4>
-                                <p className="text-sm text-green-800">{doubt.teacherAnswer}</p>
-                            </div>
-                        )}
+                        <AnswerSection aiAnswer={doubt.aiAnswer} doubt={doubt} />
                     </div>
                 )}
             </CardContent>

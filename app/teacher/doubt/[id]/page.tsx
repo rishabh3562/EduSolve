@@ -32,10 +32,15 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchDoubt = async () => {
       const doubtData = await getDoubtById(params.id);
-      if (doubtData) setDoubt(doubtData);
+      console.log("doubt data", doubtData);
+      if (doubtData) {
+        setDoubt(doubtData);
+        setTeacherAnswer(doubtData.teacherAnswer || ''); // Set teacherAnswer if it exists
+      }
     };
     fetchDoubt();
   }, [params.id]);
+
 
   const generateAnswer = async () => {
     if (!doubt) return;
@@ -122,7 +127,7 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkMath]}
                     rehypePlugins={[rehypeHighlight]}
-                   
+
                   >
                     {doubt.aiAnswer}
                   </ReactMarkdown>
@@ -131,7 +136,17 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
             </div>
 
             <div className="space-y-2">
-              <h3 className="font-medium">Your Response:</h3>
+              <div className="flex justify-between items-center">
+                <h3 className="font-medium">Your Response:</h3>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setTeacherAnswer(doubt.aiAnswer || '')}
+                  disabled={!doubt.aiAnswer}
+                >
+                  Copy AI Answer to Teacher Answer
+                </Button>
+              </div>
               <Textarea
                 value={teacherAnswer}
                 onChange={(e) => setTeacherAnswer(e.target.value)}
@@ -140,10 +155,13 @@ export default function DoubtReview({ params }: { params: { id: string } }) {
               />
               {teacherAnswer && (
                 <div className="bg-secondary p-4 rounded-lg">
-                  <ReactMarkdown>{teacherAnswer}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeHighlight]}>
+                    {teacherAnswer}
+                  </ReactMarkdown>
                 </div>
               )}
             </div>
+
 
 
           </CardContent>
