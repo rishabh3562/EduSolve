@@ -15,13 +15,7 @@ import { postDoubt ,supabase} from '@/lib/supabase';
 import { askFormDataType, User } from '@/lib/types';
 
 const subjects = [
-  'General',
-  'Data Science',
-  'Web Dev (MERN etc)',
-  'Cloud',
-  'Cyber Security',
-  'DSA',
-  'Maths',
+  'Python Fullstack'
 ];
 
 export default function AskDoubt() {
