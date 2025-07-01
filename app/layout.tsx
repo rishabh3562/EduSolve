@@ -39,7 +39,7 @@ export default function RootLayout({
         >
           <AuthGuard>
             {children}
-            <Analytics />
+            
           </AuthGuard>
           <Toaster />
         </ThemeProvider>
